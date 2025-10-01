@@ -55,7 +55,10 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ fromJSON(env.REGISTRIES) }}
+          images: |
+            us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/oncall/oncall
+            us-east1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/oncall/oncall
+            europe-west1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/oncall/oncall
           tags: |
             type=ref,event=branch
             type=ref,event=pr
@@ -63,7 +66,7 @@ jobs:
             type=semver,pattern={{major}}.{{minor}}
             type=semver,pattern={{major}}
             type=raw,value=latest,enable={{is_default_branch}}
-            type=sha,prefix={{branch}}-
+            type=raw,value=latest
       
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
@@ -81,57 +84,6 @@ jobs:
             VCS_REF=${{ github.sha }}
             VERSION=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.version'] }}
       
-      - name: Create Artifact Registry repositories (if they don't exist)
-        if: github.event_name != 'pull_request'
-        run: |
-          # Parse the registries from the environment variable
-          IFS=$'\n' read -d '' -r -a registry_array <<< "${{ env.REGISTRIES }}"
-          
-          for registry in "${registry_array[@]}"; do
-            # Extract region and repository name from registry URL
-            if [[ $registry =~ ([a-z0-9-]+)-docker\.pkg\.dev/([^/]+)/([^/]+)/([^/]+) ]]; then
-              region="${BASH_REMATCH[1]}"
-              project="${BASH_REMATCH[2]}"
-              repo_name="${BASH_REMATCH[3]}"
-              image_name="${BASH_REMATCH[4]}"
-              
-              echo "Creating repository $repo_name in region $region for project $project"
-              
-              # Create the repository if it doesn't exist
-              gcloud artifacts repositories create $repo_name \
-                --repository-format=docker \
-                --location=$region \
-                --project=$project \
-                --description="Docker repository for $image_name" \
-                --quiet || echo "Repository $repo_name already exists or creation failed"
-            fi
-          done
-      
-      - name: Push to multiple registries
-        if: github.event_name != 'pull_request'
-        run: |
-          # Parse the registries from the environment variable
-          IFS=$'\n' read -d '' -r -a registry_array <<< "${{ env.REGISTRIES }}"
-          
-          # Get the tags from the metadata step
-          tags="${{ steps.meta.outputs.tags }}"
-          
-          # Build the image once and tag it for each registry
-          for registry in "${registry_array[@]}"; do
-            echo "Pushing to registry: $registry"
-            
-            # Configure Docker for this specific region
-            region=$(echo $registry | cut -d'-' -f1)
-            gcloud auth configure-docker $region-docker.pkg.dev --quiet
-            
-            # Tag and push for each tag
-            for tag in $tags; do
-              # Extract just the tag name without registry prefix
-              tag_name=$(echo $tag | cut -d':' -f2)
-              docker tag $IMAGE_NAME:$tag_name $registry:$tag_name
-              docker push $registry:$tag_name
-            done
-          done
       
       - name: Output image information
         if: github.event_name != 'pull_request'
@@ -139,15 +91,11 @@ jobs:
           echo "## Published Images" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           
-          IFS=$'\n' read -d '' -r -a registry_array <<< "${{ env.REGISTRIES }}"
+          # Get the tags from the metadata step
           tags="${{ steps.meta.outputs.tags }}"
           
-          for registry in "${registry_array[@]}"; do
-            echo "### $registry" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            for tag in $tags; do
-              tag_name=$(echo $tag | cut -d':' -f2)
-              echo "- \`$registry:$tag_name\`" >> $GITHUB_STEP_SUMMARY
-            done
-            echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Published Tags" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          for tag in $tags; do
+            echo "- \`$tag\`" >> $GITHUB_STEP_SUMMARY
           done

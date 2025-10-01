@@ -22,36 +22,8 @@ Create a service account in your GCP project with the following roles:
 
 ### 2. Workload Identity Federation Setup
 
-Set up Workload Identity Federation to allow GitHub Actions to authenticate to GCP without storing service account keys:
-
-```bash
-# Enable required APIs
-gcloud services enable iamcredentials.googleapis.com
-
-# Create a Workload Identity Pool
-gcloud iam workload-identity-pools create "github-pool" \
-  --project="$PROJECT_ID" \
-  --location="global" \
-  --display-name="GitHub Actions Pool"
-
-# Create a Workload Identity Provider
-gcloud iam workload-identity-pools providers create-oidc "github-provider" \
-  --project="$PROJECT_ID" \
-  --location="global" \
-  --workload-identity-pool="github-pool" \
-  --display-name="GitHub Provider" \
-  --attribute-mapping="google.subject=assertion.sub,attribute.actor=assertion.actor,attribute.repository=assertion.repository" \
-  --issuer-uri="https://token.actions.githubusercontent.com"
-
-# Allow GitHub Actions to impersonate the service account
-gcloud iam service-accounts add-iam-policy-binding \
-  --project="$PROJECT_ID" \
-  --role="roles/iam.workloadIdentityUser" \
-  --member="principalSet://iam.googleapis.com/projects/$PROJECT_NUMBER/locations/global/workloadIdentityPools/github-pool/providers/github-provider" \
-  "$SERVICE_ACCOUNT_EMAIL"
-```
-
-### 3. GitHub Secrets
+This is done in the devops repo in the xyai-devops-root project.
+The images are in xyai-artifact-registry
 
 Add the following secrets to your GitHub repository:
 
@@ -66,9 +38,9 @@ Edit the `REGISTRIES` environment variable in the workflow file to specify your 
 ```yaml
 env:
   REGISTRIES: |
-    us-central1-docker.pkg.dev/your-project/oncall/oncall
-    us-east1-docker.pkg.dev/your-project/oncall/oncall
-    europe-west1-docker.pkg.dev/your-project/oncall/oncall
+    us-central1-docker.pkg.dev/XY-Corp/oncall/oncall
+    us-east1-docker.pkg.dev/XY-Corp/oncall/oncall
+    europe-west1-docker.pkg.dev/XY-Corp/oncall/oncall
 ```
 
 ### 5. Customize Image Name
@@ -115,15 +87,15 @@ After a successful build, the workflow will:
 ```
 ## Published Images
 
-### us-central1-docker.pkg.dev/your-project/oncall/oncall
-- `us-central1-docker.pkg.dev/your-project/oncall/oncall:latest`
-- `us-central1-docker.pkg.dev/your-project/oncall/oncall:v1.0.0`
-- `us-central1-docker.pkg.dev/your-project/oncall/oncall:main-abc1234`
+### us-central1-docker.pkg.dev/XY-Corp/oncall/oncall
+- `us-central1-docker.pkg.dev/XY-Corp/oncall/oncall:latest`
+- `us-central1-docker.pkg.dev/XY-Corp/oncall/oncall:v1.0.0`
+- `us-central1-docker.pkg.dev/XY-Corp/oncall/oncall:main-abc1234`
 
-### us-east1-docker.pkg.dev/your-project/oncall/oncall
-- `us-east1-docker.pkg.dev/your-project/oncall/oncall:latest`
-- `us-east1-docker.pkg.dev/your-project/oncall/oncall:v1.0.0`
-- `us-east1-docker.pkg.dev/your-project/oncall/oncall:main-abc1234`
+### us-east1-docker.pkg.dev/XY-Corp/oncall/oncall
+- `us-east1-docker.pkg.dev/XY-Corp/oncall/oncall:latest`
+- `us-east1-docker.pkg.dev/XY-Corp/oncall/oncall:v1.0.0`
+- `us-east1-docker.pkg.dev/XY-Corp/oncall/oncall:main-abc1234`
 ```
 
 ## Troubleshooting
@@ -161,10 +133,10 @@ To add more regions, simply add more registry URLs to the `REGISTRIES` environme
 ```yaml
 env:
   REGISTRIES: |
-    us-central1-docker.pkg.dev/your-project/oncall/oncall
-    us-east1-docker.pkg.dev/your-project/oncall/oncall
-    europe-west1-docker.pkg.dev/your-project/oncall/oncall
-    asia-southeast1-docker.pkg.dev/your-project/oncall/oncall
+    us-central1-docker.pkg.dev/XY-Corp/oncall/oncall
+    us-east1-docker.pkg.dev/XY-Corp/oncall/oncall
+    europe-west1-docker.pkg.dev/XY-Corp/oncall/oncall
+    asia-southeast1-docker.pkg.dev/XY-Corp/oncall/oncall
 ```
 
 ### Changing Build Context
