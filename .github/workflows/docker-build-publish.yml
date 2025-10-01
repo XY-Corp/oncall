@@ -18,9 +18,9 @@ env:
   GCP_REGION: us-central1
   IMAGE_NAME: oncall
   REGISTRIES: |
-    us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/oncall/oncall
-    us-east1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/oncall/oncall
-    europe-west1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/oncall/oncall
+    us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/xyai-images/oncall
+    us-east1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/xyai-images/oncall
+    europe-west1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/xyai-images/oncall
 
 jobs:
   build-and-publish:
@@ -56,9 +56,9 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: |
-            us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/oncall/oncall
-            us-east1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/oncall/oncall
-            europe-west1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/oncall/oncall
+            us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/xyai-images/oncall
+            us-east1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/xyai-images/oncall
+            europe-west1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/xyai-images/oncall
           tags: |
             type=ref,event=branch
             type=ref,event=pr
