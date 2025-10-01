@@ -84,32 +84,6 @@ jobs:
             VCS_REF=${{ github.sha }}
             VERSION=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.version'] }}
       
-      - name: Create Artifact Registry repositories (if they don't exist)
-        if: github.event_name != 'pull_request'
-        run: |
-          # Parse the registries from the environment variable
-          IFS=$'\n' read -d '' -r -a registry_array <<< "${{ env.REGISTRIES }}"
-          
-          for registry in "${registry_array[@]}"; do
-            # Extract region and repository name from registry URL
-            if [[ $registry =~ ([a-z0-9-]+)-docker\.pkg\.dev/([^/]+)/([^/]+)/([^/]+) ]]; then
-              region="${BASH_REMATCH[1]}"
-              project="${BASH_REMATCH[2]}"
-              repo_name="${BASH_REMATCH[3]}"
-              image_name="${BASH_REMATCH[4]}"
-              
-              echo "Creating repository $repo_name in region $region for project $project"
-              
-              # Create the repository if it doesn't exist
-              gcloud artifacts repositories create $repo_name \
-                --repository-format=docker \
-                --location=$region \
-                --project=$project \
-                --description="Docker repository for $image_name" \
-                --quiet || echo "Repository $repo_name already exists or creation failed"
-            fi
-          done
-      
       
       - name: Output image information
         if: github.event_name != 'pull_request'
