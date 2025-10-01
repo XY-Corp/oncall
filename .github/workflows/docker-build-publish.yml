@@ -17,7 +17,10 @@ env:
   GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
   GCP_REGION: us-central1
   IMAGE_NAME: oncall
-  REGISTRIES: '["us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/oncall/oncall", "us-east1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/oncall/oncall", "europe-west1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/oncall/oncall"]'
+  REGISTRIES: |
+    us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/oncall/oncall
+    us-east1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/oncall/oncall
+    europe-west1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/oncall/oncall
 
 jobs:
   build-and-publish:
@@ -52,7 +55,10 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ fromJSON(env.REGISTRIES) }}
+          images: |
+            us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/oncall/oncall
+            us-east1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/oncall/oncall
+            europe-west1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/oncall/oncall
           tags: |
             type=ref,event=branch
             type=ref,event=pr
@@ -81,9 +87,8 @@ jobs:
       - name: Create Artifact Registry repositories (if they don't exist)
         if: github.event_name != 'pull_request'
         run: |
-          # Parse the registries from the JSON environment variable
-          registries_json='${{ env.REGISTRIES }}'
-          registry_array=($(echo "$registries_json" | jq -r '.[]'))
+          # Parse the registries from the environment variable
+          IFS=$'\n' read -d '' -r -a registry_array <<< "${{ env.REGISTRIES }}"
           
           for registry in "${registry_array[@]}"; do
             # Extract region and repository name from registry URL
@@ -108,9 +113,8 @@ jobs:
       - name: Push to multiple registries
         if: github.event_name != 'pull_request'
         run: |
-          # Parse the registries from the JSON environment variable
-          registries_json='${{ env.REGISTRIES }}'
-          registry_array=($(echo "$registries_json" | jq -r '.[]'))
+          # Parse the registries from the environment variable
+          IFS=$'\n' read -d '' -r -a registry_array <<< "${{ env.REGISTRIES }}"
           
           # Get the tags from the metadata step
           tags="${{ steps.meta.outputs.tags }}"
@@ -138,9 +142,7 @@ jobs:
           echo "## Published Images" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           
-          # Parse the registries from the JSON environment variable
-          registries_json='${{ env.REGISTRIES }}'
-          registry_array=($(echo "$registries_json" | jq -r '.[]'))
+          IFS=$'\n' read -d '' -r -a registry_array <<< "${{ env.REGISTRIES }}"
           tags="${{ steps.meta.outputs.tags }}"
           
           for registry in "${registry_array[@]}"; do
