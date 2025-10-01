@@ -20,7 +20,7 @@ env:
   REGISTRIES: |
     us-central1-docker.pkg.dev/xyai-artifact-registry/xyai-images/oncall
     us-east1-docker.pkg.dev/xyai-artifact-registry/xyai-images/oncall
-    europe-west1-docker.pkg.dev/xyai-artifact-registry/xyai-images/oncall
+    us-west1-docker.pkg.dev/xyai-artifact-registry/xyai-images/oncall
 
 jobs:
   build-and-publish:
@@ -51,7 +51,7 @@ jobs:
           # Configure Docker for Artifact Registry
           gcloud auth configure-docker us-central1-docker.pkg.dev --quiet
           gcloud auth configure-docker us-east1-docker.pkg.dev --quiet
-          gcloud auth configure-docker europe-west1-docker.pkg.dev --quiet
+          gcloud auth configure-docker us-west1-docker.pkg.dev --quiet
       
       - name: Extract metadata
         id: meta
@@ -60,7 +60,7 @@ jobs:
           images: |
             us-central1-docker.pkg.dev/xyai-artifact-registry/xyai-images/oncall
             us-east1-docker.pkg.dev/xyai-artifact-registry/xyai-images/oncall
-            europe-west1-docker.pkg.dev/xyai-artifact-registry/xyai-images/oncall
+            us-west1-docker.pkg.dev/xyai-artifact-registry/xyai-images/oncall
           tags: |
             type=ref,event=branch
             type=ref,event=pr
