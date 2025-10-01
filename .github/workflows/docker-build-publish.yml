@@ -18,9 +18,9 @@ env:
   GCP_REGION: us-central1
   IMAGE_NAME: oncall
   REGISTRIES: |
-    us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/xyai-images/oncall
-    us-east1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/xyai-images/oncall
-    europe-west1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/xyai-images/oncall
+    us-central1-docker.pkg.dev/xyai-artifact-registry/xyai-images/oncall
+    us-east1-docker.pkg.dev/xyai-artifact-registry/xyai-images/oncall
+    europe-west1-docker.pkg.dev/xyai-artifact-registry/xyai-images/oncall
 
 jobs:
   build-and-publish:
@@ -49,16 +49,18 @@ jobs:
         run: |
           gcloud auth configure-docker --quiet
           # Configure Docker for Artifact Registry
-          gcloud auth configure-docker ${{ env.GCP_REGION }}-docker.pkg.dev --quiet
+          gcloud auth configure-docker us-central1-docker.pkg.dev --quiet
+          gcloud auth configure-docker us-east1-docker.pkg.dev --quiet
+          gcloud auth configure-docker europe-west1-docker.pkg.dev --quiet
       
       - name: Extract metadata
         id: meta
         uses: docker/metadata-action@v5
         with:
           images: |
-            us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/xyai-images/oncall
-            us-east1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/xyai-images/oncall
-            europe-west1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/xyai-images/oncall
+            us-central1-docker.pkg.dev/xyai-artifact-registry/xyai-images/oncall
+            us-east1-docker.pkg.dev/xyai-artifact-registry/xyai-images/oncall
+            europe-west1-docker.pkg.dev/xyai-artifact-registry/xyai-images/oncall
           tags: |
             type=ref,event=branch
             type=ref,event=pr
