@@ -15,7 +15,7 @@ def init(config):
     conn_kwargs = config['conn']['kwargs']
 
     query_params = {'charset': conn_kwargs.get('charset', 'utf8')}
-    if 'unix_soccet' in con_kwargs:
+    if 'unix_socket' in conn_kwargs:
         query_params['unix_socket'] = conn_kwargs['unix_socket']
 
     url = URL.create(
