@@ -1,4 +1,5 @@
 from sqlalchemy import create_engine
+from sqlalchemy.engine.url import URL
 import ssl
 
 connect = None
@@ -11,14 +12,31 @@ def init(config):
     global DictCursor
     global IntegrityError
 
+    conn_kwargs = config['conn']['kwargs']
+
+    query_params = {'charset': conn_kwargs.get('charset', 'utf8')}
+    if 'unix_socket' in conn_kwargs:
+        query_params['unix_socket'] = conn_kwargs['unix_socket']
+
+    url = URL.create(
+        drivername=conn_kwargs['scheme'],
+        username=conn_kwargs['user'],
+        password=conn_kwargs['password'],
+        host=conn_kwargs.get('host'),
+        port=conn_kwargs.get('port'),
+        database=conn_kwargs['database'],
+        query=query_params
+    )
+
     connect_args = {}
     if config['conn'].get('use_ssl'):
         ssl_ctx = ssl.create_default_context()
         connect_args["ssl"] = ssl_ctx
 
     engine = create_engine(
-        config['conn']['str'] % config['conn']['kwargs'],
+        url,
         connect_args=connect_args,
+        echo=conn_kwargs.get('echo'),
         **config['kwargs']
     )
 

@@ -15,7 +15,6 @@ db:
       database: oncall
       charset: utf8
       echo: True
-    str: "%(scheme)s://%(user)s:%(password)s@%(host)s/%(database)s?charset=%(charset)s"
   kwargs:
     pool_recycle: 3600
 session:
