@@ -11,11 +11,12 @@ db:
       scheme: mysql+pymysql
       user: ${DB_USER}
       password: ${DB_PASSWORD}
-      host: /cloudsql/${DB_CONNECTION_NAME}
+      host: localhost
+      unix_socket: /cloudsql/${DB_CONNECTION_NAME}
       database: ${DB_NAME}
       charset: utf8
       echo: False
-    str: "%(scheme)s://%(user)s:%(password)s@%(host)s/%(database)s?charset=%(charset)s"
+    str: "%(scheme)s://%(user)s:%(password)s@%(host)s/%(database)s?charset=%(charset)s&unix_socket=%(unix_socket)s"
   kwargs:
     pool_recycle: 3600
 session:
