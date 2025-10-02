@@ -112,6 +112,10 @@ def main():
     oncall_config = read_config(
         os.environ.get('ONCALL_CFG_PATH', '/home/oncall/config/config.yaml'))
     mysql_config = oncall_config['db']['conn']['kwargs']
+    
+    # Debug: print the actual socket path after environment variable expansion
+    if 'unix_socket' in mysql_config:
+        print('Unix socket path after expansion: %s' % mysql_config['unix_socket'])
 
     # It often takes several seconds for MySQL to start up. oncall dies upon start
     # if it can't immediately connect to MySQL, so we have to wait for it.
