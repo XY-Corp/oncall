@@ -18,8 +18,16 @@ def load_sqldump(config, sqlfile, one_db=True):
     with open(sqlfile) as h:
         env = os.environ.copy()
         env['MYSQL_PWD'] = config['password']
-        cmd = ['/usr/bin/mysql', '-h', config['host'], '-u', config['user'], '-P', str(config['port'])]
-        if one_db: cmd += ['-o', config['database']]
+        
+        # Use Unix socket if available, otherwise use TCP
+        cmd_base = ['/usr/bin/mysql', '-u', config['user']]
+        if 'unix_socket' in config:
+            cmd = cmd_base + ['--socket', config['unix_socket']]
+        else:
+            cmd = cmd_base + ['-h', config['host'], '-P', str(config['port'])]
+        
+        if one_db:
+            cmd += ['-o', config['database']]
         proc = subprocess.Popen(cmd, stdin=h, env=env)
         proc.communicate()
 
