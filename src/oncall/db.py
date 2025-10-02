@@ -36,6 +36,7 @@ def init(config):
     engine = create_engine(
         url,
         connect_args=connect_args,
+        echo=conn_kwargs.get('echo'),
         **config['kwargs']
     )
 
