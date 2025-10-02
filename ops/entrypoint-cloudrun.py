@@ -62,8 +62,8 @@ def wait_for_mysql(config):
 def initialize_mysql_schema(config):
     print('Initializing oncall database')
     # disable one_db to let schema.v0.sql create the database
-    re = load_sqldump(config, os.path.join(dbpath, 'schema.v0.sql'), one_db=False)
-    if not re:
+    result = load_sqldump(config, os.path.join(dbpath, 'schema.v0.sql'), one_db=False)
+    if not result:
         sys.exit('Failed to load schema into DB.')
 
     for f in glob(os.path.join(dbpath, 'patches', '*.sql')):
