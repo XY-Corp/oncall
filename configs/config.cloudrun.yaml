@@ -10,7 +10,7 @@ db:
     kwargs:
       scheme: mysql+pymysql
       user: ${DB_USER}
-      password: '${DB_PASSWORD}'
+      password: ${DB_PASSWORD}
       host: ${DB_HOST}
       port: ${DB_PORT}
       database: ${DB_NAME}
@@ -20,8 +20,8 @@ db:
   kwargs:
     pool_recycle: 3600
 session:
-  encrypt_key: '${SESSION_ENCRYPT_KEY}'
-  sign_key: '${SESSION_SIGN_KEY}'
+  encrypt_key: ${SESSION_ENCRYPT_KEY}
+  sign_key: ${SESSION_SIGN_KEY}
 auth:
   debug: False
   module: 'oncall.auth.modules.debug'
