@@ -16,7 +16,6 @@ db:
       database: ${DB_NAME}
       charset: utf8
       echo: False
-    str: "%(scheme)s://%(user)s:%(password)s@%(host)s/%(database)s?charset=%(charset)s&unix_socket=%(unix_socket)s"
   kwargs:
     pool_recycle: 3600
 session:
