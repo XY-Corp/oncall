@@ -15,30 +15,51 @@ initializedfile = '/home/oncall/db_initialized'
 
 def load_sqldump(config, sqlfile, one_db=True):
     print('Importing %s...' % sqlfile)
-    with open(sqlfile) as h:
-        env = os.environ.copy()
-        env['MYSQL_PWD'] = config['password']
-        
-        # Use Unix socket if available, otherwise use TCP
-        cmd_base = ['/usr/bin/mysql', '-u', config['user']]
-        if 'unix_socket' in config:
-            cmd = cmd_base + ['--socket', config['unix_socket']]
-        else:
-            cmd = cmd_base + ['-h', config['host'], '-P', str(config['port'])]
-        
+    
+    cmd_base = ['/usr/bin/mysql', '-u', config['user']]
+    env = os.environ.copy()
+    env['MYSQL_PWD'] = config['password']
+    
+    if 'unix_socket' in config:
+        print('Attempting Unix socket: %s' % config['unix_socket'])
+        cmd = cmd_base + ['--socket', config['unix_socket']]
         if one_db:
             cmd += ['-o', config['database']]
+        
+        # Try Unix socket with retries (wait for Cloud SQL socket to be mounted)
+        for attempt in range(3):
+            with open(sqlfile) as h:
+                proc = subprocess.Popen(cmd, stdin=h, env=env)
+                proc.communicate()
+            
+            if proc.returncode == 0:
+                print('DB successfully loaded ' + sqlfile + ' via Unix socket')
+                return True
+            else:
+                if attempt < 2:  # Don't sleep on the last attempt
+                    print('Unix socket attempt %d failed (exit code: %s), retrying in 5 seconds...' % (attempt + 1, proc.returncode))
+                    time.sleep(5)
+                else:
+                    print('Unix socket failed after 3 attempts (exit code: %s), falling back to TCP' % proc.returncode)
+    
+    # Fall back to TCP connection
+    print('Using TCP connection to %s:%s' % (config['host'], config['port']))
+    cmd = cmd_base + ['-h', config['host'], '-P', str(config['port'])]
+    if one_db:
+        cmd += ['-o', config['database']]
+    
+    with open(sqlfile) as h:
         proc = subprocess.Popen(cmd, stdin=h, env=env)
         proc.communicate()
 
-        if proc.returncode == 0:
-            print('DB successfully loaded ' + sqlfile)
-            return True
-        else:
-            print(('Ran into problems during DB bootstrap. '
-                   'oncall will likely not function correctly. '
-                   'mysql exit code: %s for %s') % (proc.returncode, sqlfile))
-            return False
+    if proc.returncode == 0:
+        print('DB successfully loaded ' + sqlfile)
+        return True
+    else:
+        print(('Ran into problems during DB bootstrap. '
+               'oncall will likely not function correctly. '
+               'mysql exit code: %s for %s') % (proc.returncode, sqlfile))
+        return False
 
 
 def wait_for_mysql(config):
@@ -106,3 +127,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+
