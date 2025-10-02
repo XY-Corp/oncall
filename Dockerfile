@@ -26,7 +26,8 @@ COPY ops/daemons /home/oncall/daemons
 COPY ops/daemons/uwsgi-docker.yaml /home/oncall/daemons/uwsgi.yaml
 COPY db /home/oncall/db
 COPY configs /home/oncall/config
-COPY ops/entrypoint.py /home/oncall/entrypoint.py
+# this needs to have better logic so it works with environments with TCP sockets
+COPY ops/entrypoint-cloudrun.py /home/oncall/entrypoint.py
 
 EXPOSE 8080
 
