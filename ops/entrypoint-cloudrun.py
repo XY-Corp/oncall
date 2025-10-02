@@ -16,11 +16,11 @@ initializedfile = '/home/oncall/db_initialized'
 def load_sqldump(config, sqlfile, one_db=True):
     print('Importing %s...' % sqlfile)
     with open(sqlfile) as h:
-        cmd = ['/usr/bin/mysql', '-h', config['host'], '-u',
-               config['user'], '-p' + config['password'],'-P' + str(config['port'])]
-        if one_db:
-            cmd += ['-o', config['database']]
-        proc = subprocess.Popen(cmd, stdin=h)
+        env = os.environ.copy()
+        env['MYSQL_PWD'] = config['password']
+        cmd = ['/usr/bin/mysql', '-h', config['host'], '-u', config['user'], '-P', str(config['port'])]
+        if one_db: cmd += ['-o', config['database']]
+        proc = subprocess.Popen(cmd, stdin=h, env=env)
         proc.communicate()
 
         if proc.returncode == 0:
