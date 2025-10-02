@@ -1,0 +1,27 @@
+# configs/config.cloudrun.yaml
+server:
+  host: 0.0.0.0
+  port: 8080
+debug: False
+oncall_host: ${ONCALL_HOST}
+metrics: dummy
+db:
+  conn:
+    kwargs:
+      scheme: mysql+pymysql
+      user: ${DB_USER}
+      password: '${DB_PASSWORD}'
+      host: ${DB_HOST}
+      port: ${DB_PORT}
+      database: ${DB_NAME}
+      charset: utf8
+      echo: False
+    str: "%(scheme)s://%(user)s:%(password)s@%(host)s:%(port)s/%(database)s?charset=%(charset)s"
+  kwargs:
+    pool_recycle: 3600
+session:
+  encrypt_key: '${SESSION_ENCRYPT_KEY}'
+  sign_key: '${SESSION_SIGN_KEY}'
+auth:
+  debug: False
+  module: 'oncall.auth.modules.debug'
