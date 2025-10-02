@@ -20,10 +20,11 @@ def load_sqldump(config, sqlfile, one_db=True):
         env['MYSQL_PWD'] = config['password']
         
         # Use Unix socket if available, otherwise use TCP
+        cmd_base = ['/usr/bin/mysql', '-u', config['user']]
         if 'unix_socket' in config:
-            cmd = ['/usr/bin/mysql', '--socket', config['unix_socket'], '-u', config['user']]
+            cmd = cmd_base + ['--socket', config['unix_socket']]
         else:
-            cmd = ['/usr/bin/mysql', '-h', config['host'], '-u', config['user'], '-P', str(config['port'])]
+            cmd = cmd_base + ['-h', config['host'], '-P', str(config['port'])]
         
         if one_db:
             cmd += ['-o', config['database']]
