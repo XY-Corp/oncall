@@ -41,7 +41,7 @@ setuptools.setup(
         'jinja2==3.0.3',
         'webassets',
         'beaker',
-        'cryptography==42.0.5',
+        'cryptography==46.0.7',
         'python-ldap',
         'pytz',
         'irisclient',
